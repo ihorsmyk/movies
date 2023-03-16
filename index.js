@@ -129,7 +129,8 @@ function editMovieForm(movieId) {
 
   const labelDescription = document.createElement('label');
   labelDescription.textContent = 'movie description: ';
-  const inputDescription = document.createElement('input');
+  const inputDescription = document.createElement('textarea');
+  inputDescription.setAttribute('rows', 10);
   inputDescription.value = movieItem.plot;
   labelDescription.append(inputDescription);
 
@@ -193,7 +194,8 @@ function addMovieForm() {
 
   const labelDescription = document.createElement('label');
   labelDescription.textContent = 'movie description: ';
-  const inputDescription = document.createElement('input');
+  const inputDescription = document.createElement('textarea');
+  inputDescription.setAttribute('rows', 10);
   labelDescription.append(inputDescription);
 
   fieldset.append(labelTitle, labelCategory, labelImgURL, labelDescription);

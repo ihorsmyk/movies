@@ -57,6 +57,18 @@ input {
   border-radius: 2px;
   outline: none;
   height: 28px;
+  width: 240px;
+}
+
+textarea {
+  width: 240px;
+  background-color: #ebedee;
+  font: inherit;
+  font-size: 15px;
+  border: none;
+  border-radius: 2px;
+  outline: none;
+  resize: none;
 }
 
 body {

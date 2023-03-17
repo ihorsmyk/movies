@@ -10,9 +10,20 @@ div2.classList.add('part2');
 root.append(div1, div2);
 
 window.addEventListener('popstate', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const id = urlParams.get('id');
-  if (id) renderMovieInfo(id);
+  const hash = window.location.hash;
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (!id || !hash || (hash !== '#preview' && hash !== '#edit' && hash !== '#add')) {
+    window.location.replace('/index.html');
+  } else if (hash === '#preview') {
+    renderMovieInfo(id);
+  } else if (hash === '#edit') {
+    editMovieForm(id);
+  } else if (hash === '#add') {
+    addMovieForm();
+  } else {
+    console.error('/index.html');
+  }
 });
 
 const ul = document.createElement('ul');
@@ -32,7 +43,9 @@ btnAdd.classList.add('movie-list__btn-add');
 btnAdd.addEventListener('click', e => {
   e.preventDefault();
   div2.innerHTML = '';
-  addMovieForm();
+  const id = Date.now().toString();
+  addMovieForm(id);
+  history.pushState({ id }, 'movie', '#add');
 });
 
 div1.append(ul, btnAdd);
@@ -48,7 +61,9 @@ function addMovieItem(movie) {
   h2Title.addEventListener('click', e => {
     e.preventDefault();
     div2.innerHTML = '';
-    renderMovieInfo(e.target.getAttribute('data-id'));
+    const id = e.target.getAttribute('data-id');
+    renderMovieInfo(id);
+    history.pushState({ id }, 'movie', `?id=${id}#preview`);
   });
 
   const btn = document.createElement('button');
@@ -57,17 +72,16 @@ function addMovieItem(movie) {
   btn.setAttribute('data-id', movie.id);
   btn.addEventListener('click', e => {
     e.preventDefault();
-    editMovieForm(e.target.getAttribute('data-id'));
+    const id = e.target.getAttribute('data-id');
+    editMovieForm(id);
+    history.pushState({ id }, 'movie', `?id=${id}#edit`);
   });
-
   li.append(h2Title, btn);
   return li;
 }
 
-function renderMovieInfo(movieId) {
-  history.pushState(movieId, 'movie', `?id=${movieId}#preview`);
-
-  const movieItem = arrFilms.find(el => el.id === movieId);
+function renderMovieInfo(id) {
+  const movieItem = arrFilms.find(el => el.id === id);
 
   const div = document.createElement('div');
   div.classList.add('movie');
@@ -95,10 +109,8 @@ function renderMovieInfo(movieId) {
   div2.append(div);
 }
 
-function editMovieForm(movieId) {
-  history.pushState(null, 'movie', `?id=${movieId}#edit`);
-
-  const movieItem = arrFilms.find(el => el.id === movieId);
+function editMovieForm(id) {
+  const movieItem = arrFilms.find(el => el.id === id);
 
   const form = document.createElement('form');
   form.classList.add('edit-form');
@@ -147,7 +159,8 @@ function editMovieForm(movieId) {
     movieItem.imageUrl = inputImgURL.value;
     movieItem.plot = inputDescription.value;
     syncMovies();
-    showModal('changes saved');
+    showModal('movie updated successfully', false);
+    renderMovieInfo(id);
   });
 
   const btnCancel = document.createElement('button');
@@ -156,18 +169,15 @@ function editMovieForm(movieId) {
 
   btnCancel.addEventListener('click', e => {
     e.preventDefault();
-    history.back();
+    showModal('undo changes?', true);
   });
 
   form.append(fieldset, btnOK, btnCancel);
-
   div2.innerHTML = '';
   div2.append(form);
 }
 
-function addMovieForm() {
-  history.pushState(null, 'movie', '#add');
-
+function addMovieForm(id) {
   const form = document.createElement('form');
   form.classList.add('add-form');
 
@@ -206,9 +216,8 @@ function addMovieForm() {
 
   btnOK.addEventListener('click', e => {
     e.preventDefault();
-
     const newMovie = {
-      id: Date.now().toString(),
+      id,
       title: inputTitle.value || 'no title',
       category: inputCategory.value || 'not known',
       imageUrl: inputImgURL.value || './imgs/baseImg.jpg',
@@ -217,6 +226,7 @@ function addMovieForm() {
     arrFilms.push(newMovie);
     syncMovies();
     showModal('the movie succesful added');
+    renderMovieInfo(id);
   });
 
   const btnCancel = document.createElement('button');
@@ -225,7 +235,7 @@ function addMovieForm() {
 
   btnCancel.addEventListener('click', e => {
     e.preventDefault();
-    window.history.back();
+    showModal('undo?', true);
   });
 
   form.append(fieldset, btnOK, btnCancel);
@@ -233,7 +243,7 @@ function addMovieForm() {
   div2.append(form);
 }
 
-function showModal(message) {
+function showModal(message, isCancel) {
   const modalDiv = document.createElement('div');
   modalDiv.classList.add('modal-ovarlay');
   const modal = document.createElement('div');
@@ -247,10 +257,22 @@ function showModal(message) {
   btnOk.classList.add('modal__btn-ok');
   btnOk.addEventListener('click', e => {
     e.preventDefault();
+    if (isCancel) history.back();
     modalDiv.remove();
   });
 
   modal.append(text, btnOk);
+
+  if (isCancel) {
+    const btnCancel = document.createElement('button');
+    btnCancel.textContent = 'cancel';
+    btnCancel.classList.add('modal__btn-cancel');
+    btnCancel.addEventListener('click', e => {
+      e.preventDefault();
+      modalDiv.remove();
+    });
+    modal.append(btnCancel);
+  }
 
   modalDiv.append(modal);
   root.append(modalDiv);

@@ -195,8 +195,13 @@ body {
 }
 
 .modal__btn-ok {
-  padding: 25px;
-  margin: 20px;
+  margin: 10px;
+  padding: 20px 45px 20px 45px;
+}
+
+.modal__btn-cancel {
+  margin: 10px;
+  padding: 20px;
 }
 
 .modal__message {

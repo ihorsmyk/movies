@@ -22,7 +22,8 @@ window.addEventListener('popstate', () => {
   } else if (hash === '#add') {
     addMovieForm();
   } else {
-    console.error('/index.html');
+    renderMovieList();
+    // console.error('/index.html');
   }
 });
 
